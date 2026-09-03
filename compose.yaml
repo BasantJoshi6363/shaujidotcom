@@ -1,4 +1,5 @@
 services:
+
   app:
     build:
       context: .
@@ -17,6 +18,8 @@ services:
       MYSQL_DATABASE: laravel
       MYSQL_USER: laravel
       MYSQL_PASSWORD: secret
+    ports:
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
 
