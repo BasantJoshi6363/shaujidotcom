@@ -8,5 +8,6 @@
     </head>
   <body>
     <h1>welcome to shaujidotcom (changed by basant raj joshi)</h1>
+    <h2>This is a simple welcome page.</h2>
   </body>
 </html>
