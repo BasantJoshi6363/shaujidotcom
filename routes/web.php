@@ -28,7 +28,6 @@ Route::middleware('guest')->group(function () {
         Route::post("/logout", [AuthController::class, "logout"])->name("logout");
 });
 
-<<<<<<< HEAD
 // Authenticated routes group using middleware
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', function () {
@@ -45,8 +44,3 @@ Route::middleware(['guest',])->group(function () {
     Route::view('/login', 'auth.login')->name('login');
     Route::view('/register', 'auth.register')->name('register');
 });
-=======
-
-
-
->>>>>>> 2104c04 (first phase: auth)
