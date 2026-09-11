@@ -39,8 +39,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('settings');
 });
 
+<<<<<<< HEAD
 // guest routes group using middleware
 Route::middleware(['guest',])->group(function () {
     Route::view('/login', 'auth.login')->name('login');
     Route::view('/register', 'auth.register')->name('register');
 });
+=======
+
+
+
+
+>>>>>>> 00e213b (check)
