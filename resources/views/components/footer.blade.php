@@ -7,7 +7,7 @@
             <div class="space-y-4 md:col-span-1">
                 <a href="{{ url('/') }}" class="flex items-center space-x-2 focus:outline-none">
                     <div class="relative w-9 h-9 rounded-full overflow-hidden border border-gray-700 flex items-center justify-center bg-white shadow-sm">
-                        <img src="{{ asset('images/mainlogo.jpg') }}" alt="Shauji Logo" class="w-full h-full object-cover scale-110" style="image-rendering: -webkit-optimize-contrast;">
+                        <img src="{{ asset('images/mainlogo.png') }}" alt="Shauji Logo" class="w-full h-full object-cover scale-110" style="image-rendering: -webkit-optimize-contrast;">
                         <div class="absolute inset-0 bg-black/15 pointer-events-none"></div>
                     </div>
                     <span class="text-xl font-bold tracking-tight text-white">shauji<span class="text-indigo-500">.com</span></span>
