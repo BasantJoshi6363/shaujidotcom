@@ -22,6 +22,7 @@
 
     <!-- FAQ Component -->
     <x-faq />
+    <x-pricing />
     
     <!-- Footer Component -->
     <x-footer />
