@@ -23,24 +23,14 @@ Route::middleware('guest')->group(function () {
     });
     
     
-    Route::middleware('auth')->group(function () {
+    Route::middleware('auth','verified')->group(function () {
         Route::get('/', [AuthController::class, 'welcome'])->name('welcome');
         Route::post("/logout", [AuthController::class, "logout"])->name("logout");
-});
-
-// Authenticated routes group using middleware
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/profile', function () {
-        return view('profile');
+        Route::get('/profile', function () {
+        return view('protect.profile');
     })->name('profile');
 
     Route::get('/settings', function () {
-        return view('settings');
+        return view('protect.setting');
     })->name('settings');
-});
-
-// guest routes group using middleware
-Route::middleware(['guest',])->group(function () {
-    Route::view('/login', 'auth.login')->name('login');
-    Route::view('/register', 'auth.register')->name('register');
 });
