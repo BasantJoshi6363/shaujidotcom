@@ -29,11 +29,21 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
         // $user->notify(new WelcomeUser());
-        Auth::login($user);
+        if (
+            Auth::attempt([
+                'email' => $request->email,
+                'password' => $request->password,
+            ], $request->boolean('remember'))
+        ) {
 
-        $request->session()->regenerate();
+            $request->session()->regenerate();
 
-        return redirect("/")->with('success', 'Registration successful! You are now logged in.');
+            return redirect()->intended('/dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => 'The email or password is incorrect.',
+        ])->onlyInput('email');
     }
 
     public function login(Request $request)
@@ -69,7 +79,7 @@ class AuthController extends Controller
     {
 
         $user = Auth::user();
-        return view('welcome',compact('user'));
+        return view('welcome', compact('user'));
     }
 
     public function resetPassword(Request $request)
@@ -83,7 +93,7 @@ class AuthController extends Controller
         );
 
         return $status === Password::RESET_LINK_SENT
-                    ? back()->with(['status' => __($status)])
-                    : back()->withErrors(['email' => __($status)]);
+            ? back()->with(['status' => __($status)])
+            : back()->withErrors(['email' => __($status)]);
     }
 }
