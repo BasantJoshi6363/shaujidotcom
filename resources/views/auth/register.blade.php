@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register | ShaujiDotCom</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome CDN for Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/favicon_io/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon_io/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon_io/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ asset('images/favicon_io/site.webmanifest') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -118,19 +120,64 @@
                     </div>
                 </div>
 
-                <!-- Password -->
-                <div>
-                    <label for="password" class="block text-xs font-semibold text-gray-700 mb-1">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Create a password" required 
-                        class="w-full px-4 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition duration-200">
-                </div>
+            <!-- Password -->
+<div>
+    <label for="password" class="block text-xs font-semibold text-gray-700 mb-1">
+        Password
+    </label>
 
-                <!-- Confirm Password -->
-                <div>
-                    <label for="password_confirmation" class="block text-xs font-semibold text-gray-700 mb-1">Confirm Password</label>
-                    <input type="password" id="password_confirmation" name="password_confirmation" placeholder="Confirm your password" required 
-                        class="w-full px-4 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition duration-200">
-                </div>
+    <div class="relative">
+        <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Create a password"
+            required
+            minlength="8"
+            class="w-full px-4 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition duration-200 pr-16"
+        >
+
+        <button
+            type="button"
+            onclick="togglePassword('password', 'passwordToggle')"
+            id="passwordToggle"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 hover:text-gray-600"
+        >
+            Show
+        </button>
+    </div>
+
+    <p class="text-xs text-gray-400 mt-1">
+        Password must be at least 8 characters.
+    </p>
+</div>
+
+<!-- Confirm Password -->
+<div>
+    <label for="password_confirmation" class="block text-xs font-semibold text-gray-700 mb-1">
+        Confirm Password
+    </label>
+
+    <div class="relative">
+        <input
+            type="password"
+            id="password_confirmation"
+            name="password_confirmation"
+            placeholder="Confirm your password"
+            required
+            class="w-full px-4 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition duration-200 pr-16"
+        >
+
+        <button
+            type="button"
+            onclick="togglePassword('password_confirmation', 'confirmPasswordToggle')"
+            id="confirmPasswordToggle"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 hover:text-gray-600"
+        >
+            Show
+        </button>
+    </div>
+</div>
 
                 <!-- Submit Button -->
                 <button type="submit" 
@@ -149,4 +196,18 @@
     </div>
 
 </body>
-</html>
+<script>
+    function togglePassword(inputId, buttonId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleButton = document.getElementById(buttonId);
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleButton.textContent = 'Hide';
+        } else {
+            passwordInput.type = 'password';
+            toggleButton.textContent = 'Show';
+        }
+    }
+</script>
+</html> 
