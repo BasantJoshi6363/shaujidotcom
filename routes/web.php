@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\FcebookAuthController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\ForgetPasswordController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -15,18 +16,25 @@ Route::middleware('guest')->group(function () {
     Route::view("/login", "auth.login")->name("login");
     Route::view("/register", "auth.register")->name("register");
     Route::view("/forget-password", "auth.forget")->name("forget-password");
+    Route::view('/verify-otp', 'guest.check-otp');
 
     Route::post("/register", [AuthController::class, "register"])->name("register.post");
     Route::post("/login", [AuthController::class, "login"])->name("login.post");
-    Route::post("/forget-password", [AuthController::class, "resetPassword"])->name("reset-password.post");
-    
-    });
-    
-    
-    Route::middleware('auth','verified')->group(function () {
-        Route::get('/', [AuthController::class, 'welcome'])->name('welcome');
-        Route::post("/logout", [AuthController::class, "logout"])->name("logout");
-        Route::get('/profile', function () {
+    Route::post("/send-otp", [ForgetPasswordController::class, "sendOtp"]);
+    Route::post("/verify-otp", [ForgetPasswordController::class, "verifyOtp"]);
+});
+
+Route::post("/reset-password", [ForgetPasswordController::class, "resetPassword"]);
+Route::get('/route-test-123', function () {
+    return 'YES WEB.PHP IS LOADED';
+});
+
+Route::view('/reset-password', 'guest.resetpw');
+
+Route::middleware('auth', 'verified')->group(function () {
+    Route::get('/', [AuthController::class, 'welcome'])->name('welcome');
+    Route::post("/logout", [AuthController::class, "logout"])->name("logout");
+    Route::get('/profile', function () {
         return view('protect.profile');
     })->name('profile');
 
