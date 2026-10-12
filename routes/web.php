@@ -4,6 +4,8 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\FcebookAuthController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgetPasswordController;
+use App\Http\Controllers\Profile\ProfileController;
+use App\Http\Controllers\Profile\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -34,11 +36,7 @@ Route::view('/reset-password', 'guest.resetpw');
 Route::middleware('auth', 'verified')->group(function () {
     Route::get('/', [AuthController::class, 'welcome'])->name('welcome');
     Route::post("/logout", [AuthController::class, "logout"])->name("logout");
-    Route::get('/profile', function () {
-        return view('protect.profile');
-    })->name('profile');
 
-    Route::get('/settings', function () {
-        return view('protect.setting');
-    })->name('settings');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::get('/setting', [SettingsController::class, 'index'])->name('settings');
 });

@@ -1,5 +1,7 @@
 <x-layout>
-    <main>
+   @auth
+   welcome {{ auth()->user()->name }}
+   @else
         <x-hero />
         <!-- Features Component -->
         <x-features />
@@ -8,5 +10,7 @@
         <!-- FAQ Component -->
         <x-faq />
         <x-pricing />
-    </main>
+    </main> "
+    @endauth
+
 </x-layout>
