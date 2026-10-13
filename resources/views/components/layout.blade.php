@@ -7,6 +7,8 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/favicon_io/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon_io/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon_io/favicon-16x16.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+
     <link rel="manifest" href="{{ asset('images/favicon_io/site.webmanifest') }}">
     <title>{{ $title ?? config('app.name', 'shaujidotcom') }} | Shaujidotcom</title>
     <title>{{ config('app.name', 'shaujidotcom') }}</title>

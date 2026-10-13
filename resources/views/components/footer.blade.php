@@ -62,7 +62,7 @@
                 <p class="text-sm text-gray-400">The latest news, articles, and resources sent to your inbox monthly.</p>
                 <form action="#" method="POST" class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                     @csrf
-                    <input type="email" placeholder="Enter email" class="bg-gray-800 border border-gray-700 text-sm rounded-xl px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 w-full" required>
+                    <input type="email" placeholder="Enter email" class="bg-gray-800 border border-gray-700 text-sm rounded-xl px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 w-full">
                     <button type="submit" class="bg-white text-gray-900 font-medium px-4 py-2.5 rounded-xl text-sm hover:bg-gray-100 transition whitespace-nowrap">Join</button>
                 </form>
             </div>

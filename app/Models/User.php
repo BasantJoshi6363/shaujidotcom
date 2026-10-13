@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Customer;
+
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -16,6 +18,11 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    public function customers()
+    {
+        return $this->hasMany(Customer::class);
+    }
 
     /**
      * Get the attributes that should be cast.

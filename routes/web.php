@@ -4,8 +4,10 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\FcebookAuthController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgetPasswordController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Profile\SettingsController;
+use App\Models\Customer;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -39,4 +41,12 @@ Route::middleware('auth', 'verified')->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::get('/setting', [SettingsController::class, 'index'])->name('settings');
+    Route::get('/create-customer', [CustomerController::class, 'create'])->name('create-customer');
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers');
+    Route::get('/search-customers', [CustomerController::class, 'search'])->name('search-customers');
+    Route::post('/create-customer', [CustomerController::class, 'store'])->name('create-customer.post');
+    Route::get('/edit/{id}', [CustomerController::class, 'edit'])->name('edit-customer');
+    Route::put('/update/{id}', [CustomerController::class, 'update'])->name('update-customer');
+    Route::delete('/delete/{id}', [CustomerController::class, 'destroy'])->name('delete-customer');
+
 });
