@@ -1,10 +1,6 @@
 <x-layout title="Profile">
     <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 text-gray-800">
         <div class="max-w-4xl mx-auto space-y-6">
-
-            <!-- ================================================= -->
-            <!-- PROFILE HEADER CARD -->
-            <!-- ================================================= -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6">
                 
                 <!-- Avatar / Profile Picture -->
@@ -50,10 +46,6 @@
 
             </div>
 
-
-            <!-- ================================================= -->
-            <!-- QUICK STATS GRID -->
-            <!-- ================================================= -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 
                 <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
@@ -72,11 +64,6 @@
                 </div>
 
             </div>
-
-
-            <!-- ================================================= -->
-            <!-- ACCOUNT SETTINGS & DETAILS -->
-            <!-- ================================================= -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 
                 <div class="px-6 py-4 border-b border-gray-100">
@@ -123,11 +110,8 @@
                             </button>
                         </form>
                     </div>
-
                 </div>
-
             </div>
-
         </div>
     </div>
 </x-layout>

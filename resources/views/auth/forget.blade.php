@@ -1,4 +1,4 @@
-<x-layout title="Reset Password | ShaujiDotCom">
+<x-layout title="Reset Password">
     <div class="py-16 px-4 flex items-center justify-center min-h-[calc(100vh-80px)] bg-gray-50">
         <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
             

@@ -1,4 +1,4 @@
-<x-layout title="Home | ShaujiDotCom">
+<x-layout title="Home">
     @auth
         <!-- Authenticated Dashboard Hero View -->
         <div class="py-16 px-4 flex items-center justify-center min-h-[calc(100vh-80px)] bg-gray-50">
