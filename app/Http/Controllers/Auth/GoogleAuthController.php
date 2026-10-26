@@ -66,7 +66,7 @@ class GoogleAuthController extends Controller
         Auth::login($user, true); // True to remember the user session
 
         // Redirect to dashboard
-        return redirect()->intended('/dashboard');
+        return redirect()->intended('/');
     }
 
     /**

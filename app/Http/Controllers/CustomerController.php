@@ -2,42 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
+use App\Services\LedgerService;
+use App\Support\Money;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class CustomerController extends Controller
 {
+    public function __construct(private LedgerService $ledger)
+    {
+    }
+
+    /** The logged-in user's business. The has-business middleware guarantees it exists. */
+    private function business()
+    {
+        return Auth::user()->business;
+    }
+
     public function index()
     {
-        $customer = Auth::user()->customers;
-        return view("customer.customers", compact("customer"));
-    }
-    public function store(Request $request)
-    {
-        // Logic to store a new customer in the database
+        // `balance` (in paisa) is available on each customer: $c->balance
+        $customer = $this->business()->customers()
+            ->withSum('transactions as balance', 'amount')
+            ->latest()->get();
 
-        $customer_info = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:customers,email',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:255',
-        ]);
-
-        $customer = Customer::create([
-            'user_id' => Auth::id(),
-            'name' => $customer_info['name'],
-            'email' => $customer_info['email'] ?? null,
-            'phone' => $customer_info['phone'] ?? null,
-            'address' => $customer_info['address'] ?? null,
-        ]);
-
-        return redirect()->route('welcome')->with('success', 'Customer created successfully.');
-    }
-
-    public function show($id)
-    {
-        // Logic to retrieve and display a specific customer by ID
+        return view('customer.customers', compact('customer'));
     }
 
     public function create()
@@ -45,45 +38,93 @@ class CustomerController extends Controller
         return view('customer.create');
     }
 
-    public function destroy($id)
+    public function store(Request $request)
     {
-       
-        $customer = Auth::user()->customers()->findOrFail($id);
-        $customer->delete();
-        return redirect()->route('customers')->with('success', 'Customer deleted successfully.');
+        $business = $this->business();
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email', Rule::unique('customers', 'email')->where('business_id', $business->id)],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'opening_balance' => ['nullable', 'string', 'regex:/^[\d,]{1,12}(\.\d{1,2})?$/'],
+        ]);
+
+        $opening = 0;
+        if (!empty($data['opening_balance'])) {
+            $opening = Money::toPaisa($data['opening_balance']);
+            if ($opening === null) {
+                throw ValidationException::withMessages(['opening_balance' => 'Enter a valid amount, e.g. 1500 or 1500.50']);
+            }
+        }
+
+        $customer = DB::transaction(function () use ($business, $data, $opening) {
+            $customer = $business->customers()->create(
+                Arr::only($data, ['name', 'email', 'phone', 'address']) + ['user_id' => Auth::id()]
+            );
+
+            if ($opening > 0) {
+                $this->ledger->openingBalance($customer, $opening, Auth::user());
+            }
+
+            return $customer;
+        });
+
+        return redirect()->route('customers.show', $customer->id)->with('success', 'Customer created successfully.');
     }
 
     public function edit($id)
     {
-        $customer = Auth::user()->customers()->findOrFail($id);
+        $customer = $this->business()->customers()->findOrFail($id);
         return view('customer.edit', compact('customer'));
     }
 
     public function update(Request $request, $id)
     {
-        $customer = Auth::user()->customers()->findOrFail($id);
+        $business = $this->business();
+        $customer = $business->customers()->findOrFail($id);
 
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:customers,email,' . $customer->id,
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:255',
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email', Rule::unique('customers', 'email')
+                ->where('business_id', $business->id)->ignore($customer->id)],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $customer->update($validatedData);
+        $customer->update($data);
 
         return redirect()->route('customers')->with('success', 'Customer updated successfully.');
+    }
+
+    public function destroy($id)
+    {
+        $customer = $this->business()->customers()->findOrFail($id);
+
+        // Customers with ledger history keep their records: financial history is never erased
+        if ($customer->transactions()->exists()) {
+            return redirect()->route('customers')
+                ->withErrors(['delete' => 'This customer has credit history and cannot be deleted.']);
+        }
+
+        $customer->delete();
+
+        return redirect()->route('customers')->with('success', 'Customer deleted successfully.');
     }
 
     public function search(Request $request)
     {
         $search = $request->query('search-customer');
 
-        $customer = Auth::user()->customers()
-        ->where('name','LIKE','%'. $search .'%')
-        ->orWhere('email','LIKE','%'. $search .'%')
-        ->get();
+        $customer = $this->business()->customers()
+            ->withSum('transactions as balance', 'amount')
+            ->when($search, fn ($q) => $q->where(fn ($q) => $q
+                ->where('name', 'LIKE', "%{$search}%")
+                ->orWhere('email', 'LIKE', "%{$search}%")
+                ->orWhere('phone', 'LIKE', "%{$search}%")))
+            ->latest()
+            ->get();
 
-        return view("customer.customers", compact("customer"));
+        return view('customer.customers', compact('customer'));
     }
 }

@@ -1,20 +1,32 @@
 <?php
 
 namespace App\Models;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
+
 use Illuminate\Database\Eloquent\Model;
 
 class Customer extends Model
 {
     protected $fillable = [
-        'user_id',
+        'business_id',
+        'user_id',   // who created the customer
         'name',
         'email',
         'phone',
         'address',
     ];
-    public function user(){
+
+    public function business()
+    {
+        return $this->belongsTo(Business::class);
+    }
+
+    public function user()
+    {
         return $this->belongsTo(User::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(CreditTransaction::class);
     }
 }

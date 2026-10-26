@@ -1,18 +1,19 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
+
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\Request;
-
 use Illuminate\Validation\ValidationException;
-use Password;
 
 class AuthController extends Controller
 {
-
+    /**
+     * Register a new user.
+     */
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -25,27 +26,23 @@ class AuthController extends Controller
 
         $user = User::create([
             'name' => $validated['name'],
+            'shopname' => $validated['shopname'] ?? null,
+            'phone' => $validated['phone'] ?? null,
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
         ]);
-        // $user->notify(new WelcomeUser());
-        if (
-            Auth::attempt([
-                'email' => $request->email,
-                'password' => $request->password,
-            ], $request->boolean('remember'))
-        ) {
 
-            $request->session()->regenerate();
+        Auth::login($user);
 
-            return redirect()->intended('/dashboard');
-        }
+        $request->session()->regenerate();
 
-        return back()->withErrors([
-            'email' => 'The email or password is incorrect.',
-        ])->onlyInput('email');
+        // Redirect to the initial email verification page.
+        return redirect()->route('verification.send.initial');
     }
 
+    /**
+     * Log in an existing user.
+     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -53,7 +50,10 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (!Auth::attempt(
+            $credentials,
+            $request->boolean('remember')
+        )) {
             throw ValidationException::withMessages([
                 'email' => 'The email or password is incorrect.',
             ]);
@@ -61,10 +61,13 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect('/')->with('success', 'Login successful! You are now logged in.');
+        return redirect()->intended('/')
+            ->with('success', 'Login successful! You are now logged in.');
     }
 
-
+    /**
+     * Log out the current user.
+     */
     public function logout(Request $request)
     {
         Auth::logout();
@@ -75,11 +78,13 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 
+    /**
+     * Display the welcome page.
+     */
     public function welcome()
     {
-
         $user = Auth::user();
+
         return view('welcome', compact('user'));
     }
-
 }

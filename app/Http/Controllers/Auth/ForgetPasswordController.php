@@ -3,69 +3,85 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Mail\ResetPwToken;
+use App\Mail\OtpMail;
 use App\Models\User;
+use App\Services\OtpService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 
 class ForgetPasswordController extends Controller
 {
-    public function sendOtp(Request $request)
+    public function sendOtp(Request $request, OtpService $otp)
     {
-        $validated = $request->validate([
-            'email' => 'required|email'
-        ]);
+        $validated = $request->validate(['email' => 'required|email']);
+        $email = strtolower($validated['email']);
 
-        $request->session()->put('email', $validated['email']);
-        //find user exists or not
-        $user = User::where('email', $validated['email'])->first();
+        $request->session()->put('reset_email', $email);
+        $request->session()->forget('reset_verified_email');
 
-        if (!$user) {
-            return redirect('/forget-password')->with('message', 'User doesnot exist');
+        // Same response whether or not the account exists, so emails cannot be probed
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            $code = $otp->issue('reset_password', $email);
+            if ($code !== false) {
+                Mail::to($email)->send(new OtpMail($code, 'Reset your password'));
+            }
         }
 
-        $otp = rand(100000, 999999);
-        //store it on cache
-        Cache::put('otp_' . $validated['email'], $otp, now()->addMinutes(15));
-
-        Mail::to($validated['email'])->send(new ResetPwToken($otp));
-        return redirect('/verify-otp');
+        return redirect('/verify-otp')->with('message', 'If that email is registered, a code has been sent.');
     }
 
-    public function verifyOtp(Request $request)
+    public function verifyOtp(Request $request, OtpService $otp)
     {
-        $email = session('email');
-        $credentials = $request->validate([
-            'otp' => 'required|numeric',
-        ]);
-        $otp = Cache::get('otp_' . $email);
+        $email = $request->session()->get('reset_email');
 
-        if (!$otp || $credentials['otp'] != $otp) {
-            return redirect('/verify-otp')->with('message', 'Invalid OTP');
+        if (!$email) {
+            return redirect('/forget-password')->with('message', 'Session expired. Please request a new code.');
         }
+
+        $data = $request->validate(['otp' => 'required|digits:6']);
+
+        if (!$otp->verify('reset_password', $email, $data['otp'])) {
+            return redirect('/verify-otp')->with('message', 'Invalid or expired code.');
+        }
+
+        // Only now is the reset allowed
+        $request->session()->put('reset_verified_email', $email);
+
         return redirect('/reset-password');
+    }
+
+    public function showReset(Request $request)
+    {
+        if (!$request->session()->has('reset_verified_email')) {
+            return redirect('/forget-password')->with('message', 'Please verify your email first.');
+        }
+
+        return view('guest.resetpw');
     }
 
     public function resetPassword(Request $request)
     {
-        $email = session('email');
+        $email = $request->session()->get('reset_verified_email');
+
         if (!$email) {
-            return redirect('/forget-password')
-                ->with('message', 'Reset session expired. Please request OTP again.');
+            return redirect('/forget-password')->with('message', 'Please verify your email first.');
         }
-        $credentials = $request->validate([
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+
+        $data = $request->validate(['password' => 'required|string|min:8|confirmed']);
 
         $user = User::where('email', $email)->first();
+
         if (!$user) {
-            return redirect('/reset-password')->with('message', 'User doesnot exist');
+            return redirect('/forget-password')->with('message', 'Something went wrong. Try again.');
         }
 
-        $user->password = bcrypt($credentials['password']);
+        $user->password = $data['password']; // the 'hashed' cast on User hashes it
         $user->save();
 
-        return redirect('/login')->with('message', 'Password reset successfully');
+        $request->session()->forget(['reset_email', 'reset_verified_email']);
+
+        return redirect('/login')->with('message', 'Password reset successfully.');
     }
 }
