@@ -81,10 +81,8 @@ class AuthController extends Controller
     /**
      * Display the welcome page.
      */
-    public function welcome()
-    {
-        $user = Auth::user();
-
-        return view('welcome', compact('user'));
-    }
+  public function welcome()
+{
+    return view('welcome', compact('user'));
+}
 }

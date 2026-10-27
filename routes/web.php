@@ -72,10 +72,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified', EnsureHasBusiness::class])->group(function () {
-    Route::get('/', [AuthController::class, 'welcome'])->name('welcome');
+   Route::get('/', [DashboardController::class, 'index'])->name('welcome');
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::get('/setting', [SettingsController::class, 'index'])->name('settings');
+    Route::get('/setting', [SettingsController::class, 'index'])->name('settings');
+
+Route::put('/setting/shop',     [SettingsController::class, 'updateShop'])->name('settings.shop.update');
+Route::put('/setting/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
+Route::delete('/setting/account', [SettingsController::class, 'destroyAccount'])->name('settings.account.destroy');
 
     Route::get('/create-customer', [CustomerController::class, 'create'])->name('create-customer');
     Route::post('/create-customer', [CustomerController::class, 'store'])->name('create-customer.post');
@@ -88,7 +93,6 @@ Route::middleware(['auth', 'verified', EnsureHasBusiness::class])->group(functio
 Route::post('/customers/{id}/credit', [LedgerController::class, 'credit'])->middleware('throttle:30,1')->name('customers.credit');
 Route::post('/customers/{id}/payments', [LedgerController::class, 'payment'])->middleware('throttle:30,1')->name('customers.payments');
 Route::post('/transactions/{id}/reverse', [LedgerController::class, 'reverse'])->middleware('throttle:30,1')->name('transactions.reverse');
-Route::get('/', [DashboardController::class, 'index'])->name('welcome');
 Route::get('/reports/outstanding', [ReportController::class, 'outstanding'])->name('reports.outstanding');
 Route::get('/transactions', [ReportController::class, 'transactions'])->name('transactions');
 });

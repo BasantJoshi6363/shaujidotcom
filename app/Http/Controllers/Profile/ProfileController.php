@@ -3,55 +3,22 @@
 namespace App\Http\Controllers\Profile;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Services\ReportService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
-    public function index()
+    public function index(ReportService $reports)
     {
         $user = Auth::user();
+        $business = $user->business;
+        $stats = $reports->dashboard($business);
 
-        return view('protect.profile', compact('user'));
-    }
-
-    public function update(Request $request)
-    {
-        $user = Auth::user();
-
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-                Rule::unique('users', 'email')->ignore($user->id),
-            ],
-
-            'phone' => [
-                'nullable',
-                'string',
-                'max:30',
-            ],
-
-            'shopname' => [
-                'nullable',
-                'string',
-                'max:255',
-                Rule::unique('users', 'shopname')->ignore($user->id),
-            ],
+        return view('protect.profile', [
+            'user' => $user,
+            'business' => $business,
+            'customerCount' => $stats['customer_count'],
+            'outstanding' => $stats['total_outstanding'],
         ]);
-
-        $user->update($validated);
-
-        return redirect()
-            ->route('profile')
-            ->with('success', 'Your profile has been updated successfully.');
     }
 }

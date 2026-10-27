@@ -1,115 +1,90 @@
+@use('App\Support\Money')
+@php
+    $initials = collect(explode(' ', trim($user->name)))
+        ->filter()->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))->take(2)->implode('');
+@endphp
+
 <x-layout title="Profile">
-    <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 text-gray-800">
+    <div class="py-12 px-4 bg-gray-50 min-h-[calc(100vh-80px)]">
         <div class="max-w-4xl mx-auto space-y-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6">
-                
-                <!-- Avatar / Profile Picture -->
-                <div class="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-md bg-orange-100 flex items-center justify-center text-orange-600 text-3xl font-bold">
-                    <span id="userInitials">SD</span>
+
+            @if (session('success'))
+                <div class="p-4 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">{{ session('success') }}</div>
+            @endif
+
+            {{-- Header card --}}
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-6">
+                <div class="w-24 h-24 rounded-full bg-orange-100 text-orange-600 text-3xl font-bold flex items-center justify-center shrink-0">
+                    {{ $initials }}
                 </div>
 
-                <!-- User Info -->
-                <div class="flex-1 text-center sm:text-left">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900">
-                                {{ Auth::user()->name ?? 'Shauji Owner' }}
-                            </h1>
-                            <p class="text-sm text-gray-500">
-                                {{ Auth::user()->email ?? 'owner@shopname.com' }}
-                            </p>
-                        </div>
-
-                        <!-- Edit Profile / Action -->
-                        <a
-                            href="#edit-profile"
-                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition duration-200"
-                        >
-                            <i class="fa-solid fa-pen text-[10px]"></i>
-                            <span>Edit Profile</span>
-                        </a>
-                    </div>
-
-                    <!-- Shop Tag / Badge -->
-                    <div class="mt-4 flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-xs font-medium border border-orange-200">
-                            <i class="fa-solid fa-store text-[10px]"></i>
-                            <span>{{ Auth::user()->shop_name ?? 'Shauji General Store' }}</span>
-                        </span>
-
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-medium border border-green-200">
-                            <i class="fa-solid fa-circle-check text-[10px]"></i>
-                            <span>Active Merchant</span>
-                        </span>
+                <div class="flex-grow">
+                    <h1 class="text-2xl font-bold text-gray-900">{{ $user->name }}</h1>
+                    <p class="text-sm text-gray-500">{{ $user->email }}</p>
+                    <div class="flex flex-wrap gap-2 mt-3">
+                        <span class="text-xs font-medium px-3 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-100">{{ $business->name }}</span>
+                        <span class="text-xs font-medium px-3 py-1 rounded-full bg-green-50 text-green-700 border border-green-100">Active Merchant</span>
                     </div>
                 </div>
 
+                <a href="{{ route('settings') }}"
+                   class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-5 py-2.5 rounded-lg text-sm self-start">Edit Profile</a>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                
-                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Total Customers</p>
-                    <p class="text-xl font-bold text-gray-900 mt-1">148</p>
+            {{-- Real numbers --}}
+            <div class="grid sm:grid-cols-3 gap-4">
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                    <p class="text-xs font-semibold text-gray-400 tracking-wide uppercase">Total customers</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ $customerCount }}</p>
                 </div>
-
-                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Credit Tracked</p>
-                    <p class="text-xl font-bold text-gray-900 mt-1">NPR 45,200</p>
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                    <p class="text-xs font-semibold text-gray-400 tracking-wide uppercase">Credit tracked</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ Money::format($outstanding) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">currently owed to you</p>
                 </div>
-
-                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Member Since</p>
-                    <p class="text-xl font-bold text-gray-900 mt-1">Jan 2026</p>
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                    <p class="text-xs font-semibold text-gray-400 tracking-wide uppercase">Member since</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ $user->created_at->format('M Y') }}</p>
                 </div>
-
             </div>
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                
-                <div class="px-6 py-4 border-b border-gray-100">
-                    <h2 class="text-base font-bold text-gray-900">Account Details</h2>
-                    <p class="text-xs text-gray-500">Manage your personal details and shop preferences.</p>
+
+            {{-- Account details --}}
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm">
+                <div class="p-6 border-b border-gray-100">
+                    <h2 class="font-semibold text-gray-900">Account Details</h2>
+                    <p class="text-sm text-gray-500">Manage your personal details and shop preferences.</p>
                 </div>
 
-                <div class="p-6 space-y-4">
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-gray-100">
-                        <div>
-                            <p class="text-xs text-gray-400 font-semibold uppercase">Full Name</p>
-                            <p class="text-sm font-medium text-gray-800 mt-0.5">{{ Auth::user()->name ?? 'Shauji Owner' }}</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-400 font-semibold uppercase">Phone Number</p>
-                            <p class="text-sm font-medium text-gray-800 mt-0.5">{{ Auth::user()->phone ?? '+977 98XXXXXXXX' }}</p>
-                        </div>
+                <dl class="grid sm:grid-cols-2 gap-x-8 gap-y-5 p-6 text-sm">
+                    <div>
+                        <dt class="text-xs font-semibold text-gray-400 uppercase">Full name</dt>
+                        <dd class="text-gray-900 mt-0.5">{{ $user->name }}</dd>
                     </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-gray-100">
-                        <div>
-                            <p class="text-xs text-gray-400 font-semibold uppercase">Shop Name</p>
-                            <p class="text-sm font-medium text-gray-800 mt-0.5">{{ Auth::user()->shop_name ?? 'Shauji General Store' }}</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-400 font-semibold uppercase">Location</p>
-                            <p class="text-sm font-medium text-gray-800 mt-0.5">Nepal</p>
-                        </div>
+                    <div>
+                        <dt class="text-xs font-semibold text-gray-400 uppercase">Phone number</dt>
+                        <dd class="text-gray-900 mt-0.5">{{ $business->phone ?: 'Not set' }}</dd>
                     </div>
-
-                    <!-- Action Row -->
-                    <div class="pt-2 flex items-center justify-between">
-                        <a href="{{ route('forget-password') }}" class="text-xs font-semibold text-orange-600 hover:underline">
-                            Change Password?
-                        </a>
-
-                        <!-- Logout Button Form -->
-                        <form action="{{ route('logout') ?? '#' }}" method="POST">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold rounded-lg transition duration-200">
-                                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                                <span>Log Out</span>
-                            </button>
-                        </form>
+                    <div>
+                        <dt class="text-xs font-semibold text-gray-400 uppercase">Shop name</dt>
+                        <dd class="text-gray-900 mt-0.5">{{ $business->name }}</dd>
                     </div>
+                    <div>
+                        <dt class="text-xs font-semibold text-gray-400 uppercase">Business type</dt>
+                        <dd class="text-gray-900 mt-0.5">{{ \App\Models\Business::TYPES[$business->business_type] ?? 'Other' }}</dd>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <dt class="text-xs font-semibold text-gray-400 uppercase">Location</dt>
+                        <dd class="text-gray-900 mt-0.5">{{ $business->address ?: 'Not set' }}</dd>
+                    </div>
+                </dl>
+
+                <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+                    <a href="{{ route('settings') }}#security" class="text-sm font-medium text-orange-600 hover:text-orange-700">Change Password?</a>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button class="text-sm font-medium px-4 py-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600">Log Out</button>
+                    </form>
                 </div>
             </div>
         </div>

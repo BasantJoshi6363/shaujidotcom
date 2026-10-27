@@ -23,15 +23,40 @@ class CustomerController extends Controller
         return Auth::user()->business;
     }
 
-    public function index()
-    {
-        // `balance` (in paisa) is available on each customer: $c->balance
-        $customer = $this->business()->customers()
-            ->withSum('transactions as balance', 'amount')
-            ->latest()->get();
+public function index(Request $request)
+{
+    $business = $request->attributes->get('business')
+        ?? $request->user()->business;
 
-        return view('customer.customers', compact('customer'));
-    }
+    abort_if(! $business, 403);
+
+    // view uses `$customer` (singular) as the paginator
+    $customer = $business->customers()->paginate(25);
+
+    return view('customer.customers', compact('customer', 'business'));
+}
+
+public function search(Request $request)
+{
+    $business = $request->attributes->get('business')
+        ?? $request->user()->business;
+
+    abort_if(! $business, 403);
+
+    $term = $request->query('search-customer', '');
+
+    $customer = $business->customers()
+        ->when($term !== '', function ($q) use ($term) {
+            $q->where(function ($q) use ($term) {
+                $q->where('name',  'like', "%{$term}%")
+                  ->orWhere('phone', 'like', "%{$term}%")
+                  ->orWhere('email', 'like', "%{$term}%");
+            });
+        })
+        ->paginate(25);
+
+    return view('customer.customers', compact('customer', 'business'));
+}
 
     public function create()
     {
@@ -112,19 +137,5 @@ class CustomerController extends Controller
         return redirect()->route('customers')->with('success', 'Customer deleted successfully.');
     }
 
-    public function search(Request $request)
-    {
-        $search = $request->query('search-customer');
-
-        $customer = $this->business()->customers()
-            ->withSum('transactions as balance', 'amount')
-            ->when($search, fn ($q) => $q->where(fn ($q) => $q
-                ->where('name', 'LIKE', "%{$search}%")
-                ->orWhere('email', 'LIKE', "%{$search}%")
-                ->orWhere('phone', 'LIKE', "%{$search}%")))
-            ->latest()
-            ->get();
-
-        return view('customer.customers', compact('customer'));
-    }
+  
 }

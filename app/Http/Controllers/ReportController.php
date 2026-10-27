@@ -17,7 +17,7 @@ class ReportController extends Controller
         $customers = $business->customers()
             ->withSum('transactions as balance', 'amount')
             ->withMax(['transactions as last_payment_at' => fn ($q) => $q->where('type', 'payment')], 'occurred_at')
-            ->having('balance', '>', 0)
+            ->whereRaw('(select coalesce(sum(amount), 0) from credit_transactions where credit_transactions.customer_id = customers.id) > 0')
             ->orderByDesc('balance')
             ->get();
 
